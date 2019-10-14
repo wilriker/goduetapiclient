@@ -20,15 +20,12 @@ func (bcc *BaseCommandConnection) Flush(channel types.CodeChannel) (bool, error)
 	return r.IsSuccess(), nil
 }
 
-// FIXME: Make this a real type
-type ParsedFileInfo map[string]interface{}
-
-func (bcc *BaseCommandConnection) GetFileInfo(fileName string) (*ParsedFileInfo, error) {
+func (bcc *BaseCommandConnection) GetFileInfo(fileName string) (*types.ParsedFileInfo, error) {
 	r, err := bcc.PerformCommand(commands.NewGetFileInfo(fileName))
 	if err != nil {
 		return nil, err
 	}
-	pfi := r.GetResult().(ParsedFileInfo)
+	pfi := r.GetResult().(types.ParsedFileInfo)
 	return &pfi, nil
 }
 
