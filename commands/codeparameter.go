@@ -28,7 +28,11 @@ func NewSimpleCodeParameter(letter string, value interface{}) *CodeParameter {
 }
 
 func (cp CodeParameter) String() string {
-	return fmt.Sprintf("%s%s", cp.Letter, cp.stringValue)
+	if cp.IsString {
+		return fmt.Sprintf(`%s"%s"`, cp.Letter, strings.ReplaceAll(cp.stringValue, `"`, `""`))
+	} else {
+		return fmt.Sprintf("%s%s", cp.Letter, cp.stringValue)
+	}
 }
 
 func (cp *CodeParameter) ConvertDriverIds() error {
