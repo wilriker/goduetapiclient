@@ -5,6 +5,7 @@ import "github.com/wilriker/goduetapiclient/commands"
 // MachineModel represents the full machine model as maintained by DuetControlServer
 type MachineModel struct {
 	Channels      Channels
+	Directories   Directories
 	Electronics   Electronics
 	Fans          []Fan
 	Heat          Heat
