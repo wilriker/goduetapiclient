@@ -8,15 +8,23 @@ import (
 	"strings"
 )
 
+// CodeParameter represents a parsed parameter of a G/M/T-code
 type CodeParameter struct {
-	Letter       string
+	// Letter of the code parameter (e.g. P in M106 P2)
+	Letter string
+	// IsExpression indicates if this parameter is an expression that can be evaluated
 	IsExpression bool
-	IsDriverId   bool
-	stringValue  string
-	IsString     bool
-	parsedValue  interface{}
+	// IsDriverId indicated if this parameter is a driver identifier
+	IsDriverId bool
+	// stringValue is the unparsed string representation of the code parameter
+	stringValue string
+	// IsString indicates if this parameter is a string
+	IsString bool
+	// parsedValue is the internal parsed representation of the string value
+	parsedValue interface{}
 }
 
+// NewSimpleCodeParameter instantiates a CodeParameter for the given letter and value
 func NewSimpleCodeParameter(letter string, value interface{}) *CodeParameter {
 	_, isString := value.(string)
 	return &CodeParameter{
@@ -27,6 +35,7 @@ func NewSimpleCodeParameter(letter string, value interface{}) *CodeParameter {
 	}
 }
 
+// String prints out the parameter with quotes around the value if it is a string parameter
 func (cp CodeParameter) String() string {
 	if cp.IsString {
 		return fmt.Sprintf(`%s"%s"`, cp.Letter, strings.ReplaceAll(cp.stringValue, `"`, `""`))
@@ -35,21 +44,29 @@ func (cp CodeParameter) String() string {
 	}
 }
 
+// ConvertDriverIds converts this parameter to a driver id or a list of such
 func (cp *CodeParameter) ConvertDriverIds() error {
 	if cp.IsExpression {
 		return nil
 	}
 
 	d := make([]uint64, 0)
+
+	// Split on the list-separator
 	params := strings.Split(cp.stringValue, ":")
 	for _, p := range params {
+		// Split on the board-driver-separator
 		s := strings.Split(p, ".")
+
+		// It was just one value
 		if len(s) == 1 {
 			u, err := strconv.ParseUint(s[0], 10, 64)
 			if err != nil {
 				return errors.New(fmt.Sprintf("Failed to parse driver number from %s parameter", cp.Letter))
 			}
 			d = append(d, u)
+
+			// board id was also given
 		} else if len(s) == 2 {
 			board, err := strconv.ParseUint(s[0], 10, 64)
 			if err != nil {
@@ -76,6 +93,7 @@ func (cp *CodeParameter) ConvertDriverIds() error {
 	return nil
 }
 
+// AsFloat64 returns the value as float64 if it was of this type or an error otherwise
 func (cp *CodeParameter) AsFloat64() (float64, error) {
 	if f, ok := cp.parsedValue.(float64); ok {
 		return f, nil
@@ -83,6 +101,7 @@ func (cp *CodeParameter) AsFloat64() (float64, error) {
 	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to float64 (value %s)", cp.Letter, cp.stringValue))
 }
 
+// AsInt64 returns the value as int64 if it was of this type or an error otherwise
 func (cp *CodeParameter) AsInt64() (int64, error) {
 	if i, ok := cp.parsedValue.(int64); ok {
 		return i, nil
@@ -90,6 +109,7 @@ func (cp *CodeParameter) AsInt64() (int64, error) {
 	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to int64 (value %s)", cp.Letter, cp.stringValue))
 }
 
+// AsUint64 returns the value as uint64 if it was of this type or an error otherwise
 func (cp *CodeParameter) AsUint64() (uint64, error) {
 	if u, ok := cp.parsedValue.(uint64); ok {
 		return u, nil
@@ -97,14 +117,17 @@ func (cp *CodeParameter) AsUint64() (uint64, error) {
 	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to uint64 (value %s)", cp.Letter, cp.stringValue))
 }
 
+// AsBool returns the value as bool as returned by strconv.ParseBool()
 func (cp *CodeParameter) AsBool() (bool, error) {
 	return strconv.ParseBool(cp.stringValue)
 }
 
+// AsString returns the string representation of this parameter
 func (cp *CodeParameter) AsString() string {
 	return cp.stringValue
 }
 
+// AsFloat64Slice converts this parameter to []float64 if it is a numeric type (or slice)
 func (cp *CodeParameter) AsFloat64Slice() ([]float64, error) {
 	switch v := cp.parsedValue.(type) {
 	case []float64:
@@ -132,6 +155,7 @@ func (cp *CodeParameter) AsFloat64Slice() ([]float64, error) {
 	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []float64 (value %s)", cp.Letter, cp.stringValue))
 }
 
+// AsInt64Slice converts this parameter to []int64 if it is a numeric type (or slice)
 func (cp *CodeParameter) AsInt64Slice() ([]int64, error) {
 	switch v := cp.parsedValue.(type) {
 	case []int64:
@@ -159,6 +183,7 @@ func (cp *CodeParameter) AsInt64Slice() ([]int64, error) {
 	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []int64 (value %s)", cp.Letter, cp.stringValue))
 }
 
+// AsUint64Slice converts this parameter to []uint64 if it is a numeric type (or slice)
 func (cp *CodeParameter) AsUint64Slice() ([]uint64, error) {
 	switch v := cp.parsedValue.(type) {
 	case []uint64:
@@ -186,7 +211,8 @@ func (cp *CodeParameter) AsUint64Slice() ([]uint64, error) {
 	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []uint64 (value %s)", cp.Letter, cp.stringValue))
 }
 
-func (cp *CodeParameter) Init(letter, value string, isString bool) error {
+// init will parse the string value of this parameter
+func (cp *CodeParameter) init(letter, value string, isString bool) error {
 	cp.Letter = letter
 	cp.stringValue = value
 	cp.IsString = isString
@@ -200,55 +226,7 @@ func (cp *CodeParameter) Init(letter, value string, isString bool) error {
 	} else if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
 		cp.IsExpression = true
 	} else if strings.Contains(value, ":") {
-
-		split := strings.Split(value, ":")
-		success := true
-		// FIXME: This is ugly
-		if strings.Contains(value, ".") {
-			floats := make([]float64, 0)
-			for _, s := range split {
-				f, err := strconv.ParseFloat(s, 64)
-				if err != nil {
-					success = false
-					break
-				}
-				floats = append(floats, f)
-			}
-			if success {
-				cp.parsedValue = floats
-			}
-		} else {
-			ints := make([]int64, 0)
-			for _, s := range split {
-				i, err := strconv.ParseInt(s, 10, 64)
-				if err != nil {
-					success = false
-					break
-				}
-				ints = append(ints, i)
-			}
-			if success {
-				cp.parsedValue = ints
-			} else {
-				success = true
-				uints := make([]uint64, 0)
-				for _, s := range split {
-					u, err := strconv.ParseUint(s, 10, 64)
-					if err != nil {
-						success = false
-						break
-					}
-					uints = append(uints, u)
-				}
-				if success {
-					cp.parsedValue = uints
-				}
-			}
-		}
-
-		if !success {
-			cp.parsedValue = value
-		}
+		cp.parseListValue(value)
 	} else if i, err := strconv.ParseInt(value, 10, 64); err == nil {
 		cp.parsedValue = i
 	} else if u, err := strconv.ParseUint(value, 10, 64); err == nil {
@@ -259,6 +237,64 @@ func (cp *CodeParameter) Init(letter, value string, isString bool) error {
 		cp.parsedValue = value
 	}
 	return nil
+}
+
+func (cp *CodeParameter) parseListValue(value string) {
+	split := strings.Split(value, ":")
+	success := true
+	// FIXME: This is ugly
+	if strings.Contains(value, ".") {
+
+		// Try parsing as float64
+		floats := make([]float64, 0)
+		for _, s := range split {
+			f, err := strconv.ParseFloat(s, 64)
+			if err != nil {
+				success = false
+				break
+			}
+			floats = append(floats, f)
+		}
+		if success {
+			cp.parsedValue = floats
+		}
+	} else {
+
+		// Try parsing as int64
+		ints := make([]int64, 0)
+		for _, s := range split {
+			i, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				success = false
+				break
+			}
+			ints = append(ints, i)
+		}
+		if success {
+			cp.parsedValue = ints
+		} else {
+
+			// Try parsing as uint64
+			success = true
+			uints := make([]uint64, 0)
+			for _, s := range split {
+				u, err := strconv.ParseUint(s, 10, 64)
+				if err != nil {
+					success = false
+					break
+				}
+				uints = append(uints, u)
+			}
+			if success {
+				cp.parsedValue = uints
+			}
+		}
+	}
+
+	// In case it's not a numeric type keep it as a string
+	if !success {
+		cp.parsedValue = value
+	}
 }
 
 func (cp *CodeParameter) MarshalJSON() ([]byte, error) {
@@ -291,5 +327,5 @@ func (cp *CodeParameter) UnmarshalJSON(data []byte) error {
 			isString = v.(float64) == 1
 		}
 	}
-	return cp.Init(letter, value, isString)
+	return cp.init(letter, value, isString)
 }

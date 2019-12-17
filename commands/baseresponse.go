@@ -1,23 +1,20 @@
 package commands
 
+// Response is a generic response interface
 type Response interface {
+	// IsSuccess returns true if the sent command was executed successfully
 	IsSuccess() bool
+	// GetResult returns the response body
 	GetResult() interface{}
+	// GetErrorType returns the type of error if it was not succesful
 	GetErrorType() string
+	// GetErrorMessage returns the error message if it was not successful
 	GetErrorMessage() string
 }
 
 type BaseResponse struct {
-	Success bool
-	// }
-
-	// type Response struct {
-	// BaseResponse
-	Result interface{}
-	// }
-
-	// type ErrorResponse struct {
-	// BaseResponse
+	Success      bool
+	Result       interface{}
 	ErrorType    string
 	ErrorMessage string
 }

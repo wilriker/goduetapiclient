@@ -16,15 +16,20 @@ const (
 	Unknown                  = "unknown"
 )
 
+// Move holds information about the move subsystem
 type Move struct {
-	Axes                 []Axis
-	BabystepZ            float64
-	CurrentMove          CurrentMove
-	Compensation         string
-	Drives               []Drive
-	Extruders            []Extruder
-	Geometry             Geometry
-	Idle                 MotorsIdleControl
+	Axes         []Axis
+	BabystepZ    float64
+	CurrentMove  CurrentMove
+	Compensation string
+	// HeightmapFile is the path to the current heightmap file if Compensation is "Mesh"
+	HeightmapFile string
+	Drives        []Drive
+	Extruders     []Extruder
+	Geometry      Geometry
+	Idle          MotorsIdleControl
+	// ProbeGrid holds information about the configured mesh compensation (see M557)
+	ProbeGrid            ProbeGrid
 	SpeedFactor          float64
 	CurrentWorkplace     int64
 	WorkplaceCoordinates [][]float64

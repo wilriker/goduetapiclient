@@ -11,19 +11,20 @@ import (
 )
 
 const (
-	maxSocketBufferSize   = 256 * 1024
+	// TaskCanceledException is the name of a remote exception to be checked for
 	TaskCanceledException = "TaskCanceledException"
-	DefaultSocketPath     = "/var/run/duet.sock"
+	// DefaultSocketPath is the default UNIX socket path
+	DefaultSocketPath = "/var/run/duet.sock"
 )
 
-var ErrNoData = errors.New("No data received")
-
+// BaseConnection provides common functionalities for more concrete implementations
 type BaseConnection struct {
 	socket  net.Conn
 	decoder *json.Decoder
 	id      int64
 }
 
+// Connect establishes a connecton to the given UNIX socket file
 func (bc *BaseConnection) Connect(initMessage initmessages.ClientInitMessage, socketPath string) error {
 	var err error
 	bc.socket, err = net.Dial("unix", socketPath)
@@ -32,7 +33,7 @@ func (bc *BaseConnection) Connect(initMessage initmessages.ClientInitMessage, so
 	}
 	bc.decoder = json.NewDecoder(bc.socket)
 
-	sim, err := bc.ReceiveServerInitMessage()
+	sim, err := bc.receiveServerInitMessage()
 	if err != nil {
 		return nil
 	}
@@ -59,6 +60,7 @@ func (bc *BaseConnection) Connect(initMessage initmessages.ClientInitMessage, so
 	return nil
 }
 
+// Close the UNIX socket connection
 func (bc *BaseConnection) Close() {
 	if bc.socket != nil {
 		bc.socket.Close()
@@ -66,6 +68,7 @@ func (bc *BaseConnection) Close() {
 	}
 }
 
+// PerformCommand performs an arbitrary command
 func (bc *BaseConnection) PerformCommand(command commands.Command) (commands.Response, error) {
 	err := bc.Send(command)
 	if err != nil {
@@ -84,6 +87,7 @@ func (bc *BaseConnection) PerformCommand(command commands.Command) (commands.Res
 	return br, nil
 }
 
+// ReceiveResponse receives a deserialized response from the server
 func (bc *BaseConnection) ReceiveResponse() (commands.Response, error) {
 	br := commands.BaseResponse{}
 	err := bc.Receive(&br)
@@ -93,7 +97,8 @@ func (bc *BaseConnection) ReceiveResponse() (commands.Response, error) {
 	return &br, nil
 }
 
-func (bc *BaseConnection) ReceiveServerInitMessage() (*initmessages.ServerInitMessage, error) {
+// receiveServerInitMessage returns the ServerInitMessage
+func (bc *BaseConnection) receiveServerInitMessage() (*initmessages.ServerInitMessage, error) {
 	sim := initmessages.ServerInitMessage{}
 	err := bc.Receive(&sim)
 	if err != nil {
@@ -102,6 +107,7 @@ func (bc *BaseConnection) ReceiveServerInitMessage() (*initmessages.ServerInitMe
 	return &sim, nil
 }
 
+// Receive a deserialized object
 func (bc *BaseConnection) Receive(responseContainer interface{}) error {
 	if err := bc.decoder.Decode(responseContainer); err != nil {
 		return err
@@ -109,6 +115,7 @@ func (bc *BaseConnection) Receive(responseContainer interface{}) error {
 	return nil
 }
 
+// ReceiveJson returns a server response as a JSON string
 func (bc *BaseConnection) ReceiveJson() (string, error) {
 	var raw json.RawMessage
 	err := bc.Receive(&raw)
@@ -118,6 +125,7 @@ func (bc *BaseConnection) ReceiveJson() (string, error) {
 	return string(raw), nil
 }
 
+// Send arbitrary data
 func (bc *BaseConnection) Send(data interface{}) error {
 	b, err := json.Marshal(data)
 	if err != nil {

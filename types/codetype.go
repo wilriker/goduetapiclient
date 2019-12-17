@@ -1,5 +1,6 @@
 package types
 
+// CodeType is the generic type of G/M/T-code or being a comment
 type CodeType string
 
 const (

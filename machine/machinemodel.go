@@ -2,11 +2,13 @@ package machine
 
 import "github.com/wilriker/goduetapiclient/commands"
 
+// MachineModel represents the full machine model as maintained by DuetControlServer
 type MachineModel struct {
 	Channels      Channels
 	Electronics   Electronics
 	Fans          []Fan
 	Heat          Heat
+	HttpEndpoints []HttpEndpoint
 	Job           Job
 	Lasers        []Laser
 	MessageBox    MessageBox
@@ -19,6 +21,7 @@ type MachineModel struct {
 	State         State
 	Storages      []Storage
 	Tools         []Tool
+	UserSessions  []UserSession
 	UserVariables []UserVariable
 }
 
