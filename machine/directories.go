@@ -21,3 +21,14 @@ type Directories struct {
 	// WWW is the path to the www directory
 	WWW string
 }
+
+// NewDirectories returns an instance with all paths set to their defaults
+func NewDirectories() *Directories {
+	return &Directories{
+		Filaments: DefaultFilamentsPath,
+		GCodes:    DefaultGCodesPath,
+		Macros:    DefaultMacrosPath,
+		System:    DefaultSystemPath,
+		WWW:       DefaultWWWPath,
+	}
+}

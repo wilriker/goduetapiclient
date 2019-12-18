@@ -112,8 +112,10 @@ type Code struct {
 	Flags CodeFlags
 	// Comment provided to this G/M/T-code
 	Comment string
-	// FilePosition in bytes
+	// FilePosition of this code in bytes (optional)
 	FilePosition *int64
+	// Length of the original code in bytes (optional)
+	Length *int64
 	// Parameters are a list of parsed code parameters
 	Parameters []CodeParameter
 }
@@ -129,7 +131,7 @@ func NewCode() Code {
 }
 
 // Parameter retrieves a parameter for the given letter. This will return nil in case there
-// is no parameter with this letter.
+// is no parameter with this letter. Lookup is case-insensitive.
 func (c *Code) Parameter(letter string) *CodeParameter {
 	l := strings.ToUpper(letter)
 	for _, p := range c.Parameters {
@@ -140,7 +142,8 @@ func (c *Code) Parameter(letter string) *CodeParameter {
 	return nil
 }
 
-// ParameterOrDefault will return the Parameter for the given letter or return the given default value
+// ParameterOrDefault will return the Parameter for the given letter or return the given default value.
+// Lookup is case-insensitive.
 func (c *Code) ParameterOrDefault(letter string, value interface{}) *CodeParameter {
 	p := c.Parameter(letter)
 	if p != nil {
@@ -187,7 +190,7 @@ func (c Code) String() string {
 	}
 
 	if len(c.Result) > 0 {
-		b.WriteString("\n")
+		b.WriteString(" => ")
 		b.WriteString(strings.TrimRight(c.Result.String(), " "))
 	}
 
