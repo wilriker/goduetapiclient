@@ -10,6 +10,7 @@ type SetMachineModel struct {
 	Value string
 }
 
+// NewSetMachineModel creates a new SetMachineModel for the given key-value pair
 func NewSetMachineModel(path, val string) *SetMachineModel {
 	return &SetMachineModel{
 		BaseCommand:  *NewBaseCommand("SetMachineModel"),
