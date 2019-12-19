@@ -1,47 +1,41 @@
 package machine
 
-import (
-	"errors"
-)
-
+// Compatibility level for emulation
 type Compatibility uint64
 
 const (
+	// No emulation (same as RepRapFirmware)
 	Me Compatibility = iota
+	// RepRapFirmware emulation (i.e. no emulation)
 	RepRapFirmware
+	// Marlin emulation
 	Marlin
+	// Teacup emulation
 	Teacup
+	// Sprinter emulation
 	Sprinter
+	// Repetier emulation
 	Repetier
+	// NanoDLP emulation (special)
 	NanoDLP
 )
 
+// Channel holds information about G/M/T-code channels
 type Channel struct {
-	Compatibility       Compatibility
-	Feedrate            float64
-	RelativeExtrusion   bool
+	// Compatibility is the emulation used on this channel
+	Compatibility Compatibility
+	// Feedrate is the current feedrate in mm/s
+	Feedrate float64
+	// RelativeExtrusion represents usage of relative extrusion
+	RelativeExtrusion bool
+	// VolumetricExtrusion represents usage of volumetric extrusion
 	VolumetricExtrusion bool
+	// RelativePositioning represents usage of relative positioning
 	RelativePositioning bool
-	UsingInches         bool
-	StackDepth          uint8
-	LineNumber          int64
-}
-
-func (c *Channel) Assign(other interface{}) error {
-	if other == nil {
-		return errors.New("Cannot assign from nil value")
-	}
-	co, ok := other.(Channel)
-	if !ok {
-		return errors.New("Invalid type")
-	}
-	c.Compatibility = co.Compatibility
-	c.Feedrate = co.Feedrate
-	c.RelativeExtrusion = co.RelativeExtrusion
-	c.VolumetricExtrusion = co.VolumetricExtrusion
-	c.RelativePositioning = co.RelativePositioning
-	c.UsingInches = co.UsingInches
-	c.StackDepth = co.StackDepth
-	c.LineNumber = co.LineNumber
-	return nil
+	// UsingInches represents the usage of inches instead of mm
+	UsingInches bool
+	// StackDepth is the depth of the stack
+	StackDepth uint8
+	// LineNumber is the number of the current line
+	LineNumber int64
 }

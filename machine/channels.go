@@ -1,24 +1,34 @@
 package machine
 
 import (
-	"errors"
-
 	"github.com/wilriker/goduetapiclient/types"
 )
 
+// Channels holds all available code channels
 type Channels struct {
-	HTTP      Channel
-	Telnet    Channel
-	File      Channel
-	USB       Channel
-	AUX       Channel
-	Daemon    Channel
+	// HTTP is the G/M/T-code channel for HTTP requests
+	HTTP Channel
+	// Telnet is the G/M/T-code channel for Telnet requests
+	Telnet Channel
+	// File is the G/M/T-code channel for file jobs
+	File Channel
+	// USB is the G/M/T-code channel for USB
+	USB Channel
+	// AUX is the G/M/T-code channel for serial devices (e.g. UART, PanelDue)
+	AUX Channel
+	// Daemon is the G/M/T-code channel to deal with triggers and config.g
+	Daemon Channel
+	// CodeQueue is the G/M/T-code channel for the code queue
 	CodeQueue Channel
-	LCD       Channel
-	SPI       Channel
+	// LCD is the G/M/T-code channel for auxiliary LCD devices
+	LCD Channel
+	// SPI is the G/M/T-code channel for generic codes via SPI
+	SPI Channel
+	// AutoPause is the G/M/T-code channel for auto pause events
 	AutoPause Channel
 }
 
+// NewChannels creates a new Channels with default Compatibility set for certain channels
 func NewChannels() Channels {
 	return Channels{
 		Telnet: Channel{Compatibility: Marlin},
@@ -26,6 +36,8 @@ func NewChannels() Channels {
 	}
 }
 
+// Get will return the Channel to the given types.CodeChannel.
+// It will return SPI for unknown types.
 func (ch *Channels) Get(cc types.CodeChannel) Channel {
 	switch cc {
 	case types.HTTP:
@@ -51,25 +63,4 @@ func (ch *Channels) Get(cc types.CodeChannel) Channel {
 	default:
 		return ch.SPI
 	}
-}
-
-func (ch *Channels) Assign(other interface{}) error {
-	if other == nil {
-		return errors.New("Cannot assign from nil value")
-	}
-	co, ok := other.(Channels)
-	if !ok {
-		return errors.New("Invalid type")
-	}
-	ch.HTTP.Assign(co.HTTP)
-	ch.Telnet.Assign(co.Telnet)
-	ch.File.Assign(co.File)
-	ch.USB.Assign(co.USB)
-	ch.AUX.Assign(co.AUX)
-	ch.Daemon.Assign(co.Daemon)
-	ch.CodeQueue.Assign(co.CodeQueue)
-	ch.LCD.Assign(co.LCD)
-	ch.SPI.Assign(co.SPI)
-	ch.AutoPause.Assign(co.AutoPause)
-	return nil
 }
