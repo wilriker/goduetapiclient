@@ -42,7 +42,7 @@ func (bc *BaseConnection) Connect(initMessage initmessages.ClientInitMessage, so
 		return nil
 	}
 
-	if sim.Version < initmessages.ExpectedServerVersion {
+	if !sim.IsCompatible() {
 		return errors.New(fmt.Sprintf("Incompatible API version (expected %d got %d)", initmessages.ExpectedServerVersion, sim.Version))
 	}
 
