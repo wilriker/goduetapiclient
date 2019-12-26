@@ -39,6 +39,7 @@ func (cr CodeResult) String() string {
 	for _, m := range cr {
 		if m.Content != "" {
 			b.WriteString(m.String())
+			b.WriteByte('\n')
 		}
 	}
 	return b.String()

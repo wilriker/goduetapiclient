@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var ErrMissingParameter = errors.New("Parameter not found")
+
 // CodeParameter represents a parsed parameter of a G/M/T-code
 type CodeParameter struct {
 	// Letter of the code parameter (e.g. P in M106 P2)
@@ -95,6 +97,9 @@ func (cp *CodeParameter) ConvertDriverIds() error {
 
 // AsFloat64 returns the value as float64 if it was of this type or an error otherwise
 func (cp *CodeParameter) AsFloat64() (float64, error) {
+	if cp == nil {
+		return 0, ErrMissingParameter
+	}
 	if f, ok := cp.parsedValue.(float64); ok {
 		return f, nil
 	}
@@ -103,6 +108,9 @@ func (cp *CodeParameter) AsFloat64() (float64, error) {
 
 // AsInt64 returns the value as int64 if it was of this type or an error otherwise
 func (cp *CodeParameter) AsInt64() (int64, error) {
+	if cp == nil {
+		return 0, ErrMissingParameter
+	}
 	if i, ok := cp.parsedValue.(int64); ok {
 		return i, nil
 	}
@@ -111,6 +119,9 @@ func (cp *CodeParameter) AsInt64() (int64, error) {
 
 // AsUint64 returns the value as uint64 if it was of this type or an error otherwise
 func (cp *CodeParameter) AsUint64() (uint64, error) {
+	if cp == nil {
+		return 0, ErrMissingParameter
+	}
 	if u, ok := cp.parsedValue.(uint64); ok {
 		return u, nil
 	}
@@ -119,6 +130,9 @@ func (cp *CodeParameter) AsUint64() (uint64, error) {
 
 // AsBool returns the value as bool as returned by strconv.ParseBool()
 func (cp *CodeParameter) AsBool() (bool, error) {
+	if cp == nil {
+		return false, ErrMissingParameter
+	}
 	return strconv.ParseBool(cp.stringValue)
 }
 
@@ -129,6 +143,9 @@ func (cp *CodeParameter) AsString() string {
 
 // AsFloat64Slice converts this parameter to []float64 if it is a numeric type (or slice)
 func (cp *CodeParameter) AsFloat64Slice() ([]float64, error) {
+	if cp == nil {
+		return nil, ErrMissingParameter
+	}
 	switch v := cp.parsedValue.(type) {
 	case []float64:
 		return v, nil
@@ -157,6 +174,9 @@ func (cp *CodeParameter) AsFloat64Slice() ([]float64, error) {
 
 // AsInt64Slice converts this parameter to []int64 if it is a numeric type (or slice)
 func (cp *CodeParameter) AsInt64Slice() ([]int64, error) {
+	if cp == nil {
+		return nil, ErrMissingParameter
+	}
 	switch v := cp.parsedValue.(type) {
 	case []int64:
 		return v, nil
@@ -185,6 +205,9 @@ func (cp *CodeParameter) AsInt64Slice() ([]int64, error) {
 
 // AsUint64Slice converts this parameter to []uint64 if it is a numeric type (or slice)
 func (cp *CodeParameter) AsUint64Slice() ([]uint64, error) {
+	if cp == nil {
+		return nil, ErrMissingParameter
+	}
 	switch v := cp.parsedValue.(type) {
 	case []uint64:
 		return v, nil
