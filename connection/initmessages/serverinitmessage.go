@@ -3,7 +3,7 @@ package initmessages
 const (
 	// ExpectedServerVersion is the version the server needs to have to be compatible with
 	// this client
-	ExpectedServerVersion = 2
+	ExpectedServerVersion = 3
 )
 
 // ServerInitMessage is sent by the server to the client in JSON format once a connection
