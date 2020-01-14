@@ -131,6 +131,19 @@ func NewCode() Code {
 	}
 }
 
+// IsMajorNumber is a convenience function that checks if
+// the MajorNumber of this Code instance is present and equal
+// to the given value
+func (c *Code) IsMajorNumber(n int64) bool {
+	return c.MajorNumber != nil && *c.MajorNumber == n
+}
+
+// HasParameter returns whether or not a certain parameter is present without returning the
+// CodeParameter instance
+func (c *Code) HasParameter(letter string) bool {
+	return c.Parameter(letter) != nil
+}
+
 // Parameter retrieves a parameter for the given letter. This will return nil in case there
 // is no parameter with this letter. Lookup is case-insensitive.
 func (c *Code) Parameter(letter string) *CodeParameter {
@@ -207,5 +220,8 @@ func (c Code) ShortString() string {
 	if c.MinorNumber != nil {
 		return fmt.Sprintf("%s%d.%d", c.Type, *c.MajorNumber, *c.MinorNumber)
 	}
-	return fmt.Sprintf("%s%d", c.Type, *c.MajorNumber)
+	if c.MajorNumber != nil {
+		return fmt.Sprintf("%s%d", c.Type, *c.MajorNumber)
+	}
+	return string(c.Type)
 }
