@@ -6,6 +6,7 @@ const (
 	DefaultMacrosPath    = "0:/macros"
 	DefaultSystemPath    = "0:/sys"
 	DefaultWWWPath       = "0:/www"
+	DefaultMenuPath      = "0:/menu"
 )
 
 // Directories holds information about the directory structure
@@ -20,6 +21,8 @@ type Directories struct {
 	System string
 	// WWW is the path to the www directory
 	WWW string
+	// Menu is the path to the menu directory (12864 displays)
+	Menu string
 }
 
 // NewDirectories returns an instance with all paths set to their defaults
@@ -30,5 +33,6 @@ func NewDirectories() *Directories {
 		Macros:    DefaultMacrosPath,
 		System:    DefaultSystemPath,
 		WWW:       DefaultWWWPath,
+		Menu:      DefaultMenuPath,
 	}
 }

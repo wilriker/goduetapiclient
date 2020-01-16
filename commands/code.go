@@ -85,6 +85,7 @@ const (
 	Abort
 	Var
 	Set
+	Echo
 )
 
 // Code is a parsed representation of a generic G/M/T/code
@@ -217,10 +218,10 @@ func (c Code) ShortString() string {
 		return "(comment)"
 	}
 
-	if c.MinorNumber != nil {
-		return fmt.Sprintf("%s%d.%d", c.Type, *c.MajorNumber, *c.MinorNumber)
-	}
 	if c.MajorNumber != nil {
+		if c.MinorNumber != nil {
+			return fmt.Sprintf("%s%d.%d", c.Type, *c.MajorNumber, *c.MinorNumber)
+		}
 		return fmt.Sprintf("%s%d", c.Type, *c.MajorNumber)
 	}
 	return string(c.Type)

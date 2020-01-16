@@ -189,4 +189,6 @@ type ProbeGrid struct {
 	YSpacing float64
 	// Radius is the probing radius on delta kinematics
 	Radius float64
+	// Spacing between the probe points for delta kinematics
+	Spacing float64
 }
