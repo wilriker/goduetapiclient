@@ -81,8 +81,8 @@ func (bcc *BaseCommandConnection) GetFileInfo(fileName string) (*types.ParsedFil
 }
 
 // PerformCode executes an arbitrary pre-parsed code
-func (bcc *BaseCommandConnection) PerformCode(code commands.Code) (*commands.CodeResult, error) {
-	r, err := bcc.PerformCommand(&code)
+func (bcc *BaseCommandConnection) PerformCode(code *commands.Code) (*commands.CodeResult, error) {
+	r, err := bcc.PerformCommand(code)
 	if err != nil {
 		return nil, err
 	}
