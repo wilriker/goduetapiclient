@@ -125,10 +125,11 @@ type Code struct {
 // NewCode instantiates a Code with default values
 func NewCode() Code {
 	return Code{
-		Type:    types.Comment,
-		Channel: types.DefaultChannel,
-		Keyword: KeywordTypeNone,
-		Flags:   CodeFlagsNone,
+		BaseCommand: *NewBaseCommand("Code"),
+		Type:        types.Comment,
+		Channel:     types.DefaultChannel,
+		Keyword:     KeywordTypeNone,
+		Flags:       CodeFlagsNone,
 	}
 }
 
