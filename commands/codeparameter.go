@@ -46,6 +46,12 @@ func (cp CodeParameter) String() string {
 	}
 }
 
+// Clone will create a copy of the this instance
+func (cp *CodeParameter) Clone() *CodeParameter {
+	cpc := *cp
+	return &cpc
+}
+
 // ConvertDriverIds converts this parameter to a driver id or a list of such
 func (cp *CodeParameter) ConvertDriverIds() error {
 	if cp.IsExpression {

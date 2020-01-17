@@ -133,6 +133,18 @@ func NewCode() Code {
 	}
 }
 
+// Clone an existing Code into a new instance
+func (c *Code) Clone() *Code {
+	cc := *c
+	cparams := make([]CodeParameter, len(c.Parameters))
+	for _, p := range c.Parameters {
+		cp := p.Clone()
+		cparams = append(cparams, *cp)
+	}
+	cc.Parameters = cparams
+	return &cc
+}
+
 // IsMajorNumber is a convenience function that checks if
 // the MajorNumber of this Code instance is present and equal
 // to the given value
@@ -166,6 +178,32 @@ func (c *Code) ParameterOrDefault(letter string, value interface{}) *CodeParamet
 		return p
 	}
 	return NewSimpleCodeParameter(letter, value)
+}
+
+// ReplaceParameter will replace the first occurrence of a parameter with the given letter
+func (c *Code) ReplaceParameter(letter string, np *CodeParameter) bool {
+	for i, p := range c.Parameters {
+		if p.Letter == letter {
+			c.Parameters[i] = *np
+			return true
+		}
+	}
+	return false
+}
+
+// RemoveParameter removes all parameters with the given letter
+func (c *Code) RemoveParameter(letter string) *CodeParameter {
+	p := c.Parameter(letter)
+	if p != nil {
+		cp := make([]CodeParameter, 0)
+		for _, p := range c.Parameters {
+			if p.Letter != letter {
+				cp = append(cp, p)
+			}
+		}
+		c.Parameters = cp
+	}
+	return p
 }
 
 // GetUnprecedentedString reconstructs an unprecedented string from parameter list
