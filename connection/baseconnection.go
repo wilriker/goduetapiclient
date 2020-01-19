@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/wilriker/goduetapiclient/commands"
@@ -26,6 +27,7 @@ type BaseConnection struct {
 	socket  net.Conn
 	decoder *json.Decoder
 	id      int64
+	Debug   bool
 }
 
 // Connect establishes a connecton to the given UNIX socket file
@@ -135,7 +137,9 @@ func (bc *BaseConnection) Send(data interface{}) error {
 	if err != nil {
 		return err
 	}
-	// log.Println(string(b))
+	if bc.Debug {
+		log.Println(string(b))
+	}
 	_, err = bc.socket.Write(b)
 	return err
 }
