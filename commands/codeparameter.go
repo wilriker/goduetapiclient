@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -101,37 +102,53 @@ func (cp *CodeParameter) ConvertDriverIds() error {
 	return nil
 }
 
-// AsFloat64 returns the value as float64 if it was of this type or an error otherwise
+// AsFloat64 returns the value as float64 if it was of this type or can be converted to one or an error otherwise
 func (cp *CodeParameter) AsFloat64() (float64, error) {
 	if cp == nil {
 		return 0, ErrMissingParameter
 	}
-	if f, ok := cp.parsedValue.(float64); ok {
-		return f, nil
+	switch v := cp.parsedValue.(type) {
+	case float64:
+		return v, nil
+	case uint64:
+		return float64(v), nil
+	case int64:
+		return float64(v), nil
+	default:
+		return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to float64 (value %s of type %T)", cp.Letter, cp.stringValue, cp.parsedValue))
 	}
-	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to float64 (value %s)", cp.Letter, cp.stringValue))
 }
 
-// AsInt64 returns the value as int64 if it was of this type or an error otherwise
+// AsInt64 returns the value as int64 if it was of this type or can be converted to one or an error otherwise
 func (cp *CodeParameter) AsInt64() (int64, error) {
 	if cp == nil {
 		return 0, ErrMissingParameter
 	}
-	if i, ok := cp.parsedValue.(int64); ok {
-		return i, nil
+	switch v := cp.parsedValue.(type) {
+	case int64:
+		return v, nil
+	case uint64:
+		if v <= math.MaxInt32 {
+			return int64(v), nil
+		}
 	}
-	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to int64 (value %s)", cp.Letter, cp.stringValue))
+	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to int64 (value %s of type %T)", cp.Letter, cp.stringValue, cp.parsedValue))
 }
 
-// AsUint64 returns the value as uint64 if it was of this type or an error otherwise
+// AsUint64 returns the value as uint64 if it was of this type or can be converted to one or an error otherwise
 func (cp *CodeParameter) AsUint64() (uint64, error) {
 	if cp == nil {
 		return 0, ErrMissingParameter
 	}
-	if u, ok := cp.parsedValue.(uint64); ok {
-		return u, nil
+	switch v := cp.parsedValue.(type) {
+	case uint64:
+		return v, nil
+	case int64:
+		if v >= 0 {
+			return uint64(v), nil
+		}
 	}
-	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to uint64 (value %s)", cp.Letter, cp.stringValue))
+	return 0, errors.New(fmt.Sprintf("Cannot convert %s parameter to uint64 (value %s of type %T)", cp.Letter, cp.stringValue, cp.parsedValue))
 }
 
 // AsBool returns the value as bool as returned by strconv.ParseBool()
@@ -175,7 +192,7 @@ func (cp *CodeParameter) AsFloat64Slice() ([]float64, error) {
 		return fs, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []float64 (value %s)", cp.Letter, cp.stringValue))
+	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []float64 (value %s of type %T)", cp.Letter, cp.stringValue, cp.parsedValue))
 }
 
 // AsInt64Slice converts this parameter to []int64 if it is a numeric type (or slice)
@@ -206,7 +223,7 @@ func (cp *CodeParameter) AsInt64Slice() ([]int64, error) {
 		return fs, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []int64 (value %s)", cp.Letter, cp.stringValue))
+	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []int64 (value %s of type %T)", cp.Letter, cp.stringValue, cp.parsedValue))
 }
 
 // AsUint64Slice converts this parameter to []uint64 if it is a numeric type (or slice)
@@ -237,7 +254,7 @@ func (cp *CodeParameter) AsUint64Slice() ([]uint64, error) {
 		return fs, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []uint64 (value %s)", cp.Letter, cp.stringValue))
+	return nil, errors.New(fmt.Sprintf("Cannot convert %s parameter to []uint64 (value %s of type %T)", cp.Letter, cp.stringValue, cp.parsedValue))
 }
 
 // init will parse the string value of this parameter
