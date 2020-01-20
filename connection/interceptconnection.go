@@ -26,7 +26,7 @@ func (ic *InterceptConnection) ReceiveCode() (*commands.Code, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &c, nil
+	return c, nil
 }
 
 // CancelCode instructs the control server to cancel the last received code

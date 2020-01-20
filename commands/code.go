@@ -123,8 +123,8 @@ type Code struct {
 }
 
 // NewCode instantiates a Code with default values
-func NewCode() Code {
-	return Code{
+func NewCode() *Code {
+	return &Code{
 		BaseCommand: *NewBaseCommand("Code"),
 		Type:        types.Comment,
 		Channel:     types.DefaultChannel,

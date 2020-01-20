@@ -2,7 +2,12 @@ package commands
 
 import "github.com/wilriker/goduetapiclient/types"
 
-// SimpleCode performs a simple G/M/T-code
+// SimpleCode performs a simple G/M/T-code.
+// On the server the code passed is converted to a full Code instance and on completion
+// its CodeResult is transformed back into a basic string. This is useful for minimal extensions
+// that do not require granular control of the code details.
+// Important Note: Except for certain cases, it is NOT recommended for usage in
+// connection.InterceptionConnection because it renders the internal code buffer useless.
 type SimpleCode struct {
 	BaseCommand
 	// Code to parse and execute
