@@ -22,7 +22,7 @@ func (ic *InterceptConnection) Connect(mode initmessages.InterceptionMode, socke
 // ReceiveCode waits for a code to be intercepted
 func (ic *InterceptConnection) ReceiveCode() (*commands.Code, error) {
 	c := commands.NewCode()
-	err := ic.Receive(&c)
+	err := ic.Receive(c)
 	if err != nil {
 		return nil, err
 	}

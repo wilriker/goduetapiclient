@@ -84,51 +84,72 @@ func (bc *BaseConnection) PerformCommand(command commands.Command) (commands.Res
 	if err != nil {
 		return nil, err
 	}
-	if !br.IsSuccess() {
-		if br.GetErrorType() == TaskCanceledException {
-			return br, errors.New(br.GetErrorMessage())
-		}
-		return br, errors.New(fmt.Sprintf("InternalServerError: %s, %s, %s", command.GetCommand(), br.GetErrorType(), br.GetErrorMessage()))
+	if br.IsSuccess() {
+		return br, nil
 	}
-	return br, nil
+
+	// The following two returns intentionally return br instead of nil
+	// so the user can work with the received data alongside a simple error object
+
+	if br.GetErrorType() == TaskCanceledException {
+		return br, errors.New(br.GetErrorMessage())
+	}
+	return br, errors.New(fmt.Sprintf("InternalServerError: %s, %s, %s", command.GetCommand(), br.GetErrorType(), br.GetErrorMessage()))
 }
 
 // ReceiveResponse receives a deserialized response from the server
 func (bc *BaseConnection) ReceiveResponse() (commands.Response, error) {
-	br := commands.BaseResponse{}
-	err := bc.Receive(&br)
+	br := &commands.BaseResponse{}
+	err := bc.Receive(br)
 	if err != nil {
 		return nil, err
 	}
-	return &br, nil
+	return br, nil
 }
 
 // receiveServerInitMessage returns the ServerInitMessage
 func (bc *BaseConnection) receiveServerInitMessage() (*initmessages.ServerInitMessage, error) {
-	sim := initmessages.ServerInitMessage{}
-	err := bc.Receive(&sim)
+	sim := &initmessages.ServerInitMessage{}
+	err := bc.Receive(sim)
 	if err != nil {
 		return nil, err
 	}
-	return &sim, nil
+	return sim, nil
 }
 
 // Receive a deserialized object
 func (bc *BaseConnection) Receive(responseContainer interface{}) error {
+	if bc.Debug {
+		var b json.RawMessage
+		if err := bc.decoder.Decode(&b); err != nil {
+			return err
+		}
+		log.Println("[DEBUG] <Recv>", string(b))
+		return json.Unmarshal(b, responseContainer)
+	}
 	if err := bc.decoder.Decode(responseContainer); err != nil {
 		return err
 	}
 	return nil
 }
 
-// ReceiveJson returns a server response as a JSON string
-func (bc *BaseConnection) ReceiveJson() (string, error) {
+// ReceiveJson returns a server response as a JSON []byteg
+func (bc *BaseConnection) ReceiveJson() ([]byte, error) {
 	var raw json.RawMessage
 	err := bc.Receive(&raw)
 	if err != nil {
+		return nil, err
+	}
+	return []byte(raw), nil
+}
+
+// ReceiveJSONString returns a server response as a JSON string
+func (bc *BaseConnection) ReceiveJSONString() (string, error) {
+	b, err := bc.ReceiveJson()
+	if err != nil {
 		return "", err
 	}
-	return string(raw), nil
+	return string(b), nil
 }
 
 // Send arbitrary data
@@ -138,7 +159,7 @@ func (bc *BaseConnection) Send(data interface{}) error {
 		return err
 	}
 	if bc.Debug {
-		log.Println(string(b))
+		log.Println("[DEBUG] <Send>", string(b))
 	}
 	_, err = bc.socket.Write(b)
 	return err

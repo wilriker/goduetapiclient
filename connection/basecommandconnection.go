@@ -81,13 +81,18 @@ func (bcc *BaseCommandConnection) GetFileInfo(fileName string) (*types.ParsedFil
 }
 
 // PerformCode executes an arbitrary pre-parsed code
+// Note that even with an error being nil the returned *commands.CodeResult
+// can also be nil, e.g. when sending Asynchronous commands that will only be queued and have no result yet.
 func (bcc *BaseCommandConnection) PerformCode(code *commands.Code) (*commands.CodeResult, error) {
 	r, err := bcc.PerformCommand(code)
 	if err != nil {
 		return nil, err
 	}
-	cr := r.GetResult().(commands.CodeResult)
-	return &cr, nil
+	if r.GetResult() != nil {
+		cr := r.GetResult().(commands.CodeResult)
+		return &cr, nil
+	}
+	return nil, nil
 }
 
 // PerformSimpleCode executes an arbitrary G/M/T-code in text form and returns the result as a string

@@ -4,22 +4,15 @@ package commands
 type Command interface {
 	// GetCommand returns the type of command
 	GetCommand() string
-	// GetSourceConnection returns the ID of the source connection
-	GetSourceConnection() int64
 }
 
 // BaseCommand is the common base member of nearly all actual commands
 type BaseCommand struct {
-	Command          string
-	SourceConnection int64
+	Command string
 }
 
 func (bc *BaseCommand) GetCommand() string {
 	return bc.Command
-}
-
-func (bc *BaseCommand) GetSourceConnection() int64 {
-	return bc.SourceConnection
 }
 
 // NewBaseCommand instantiates a new BaseCommand with the given name

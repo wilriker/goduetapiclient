@@ -91,6 +91,9 @@ const (
 // Code is a parsed representation of a generic G/M/T/code
 type Code struct {
 	BaseCommand
+	// SourceConnection ID this code was received from. If this is 0, the code originates from an internal DCS task
+	// Usually there is no need to populate this property. It is internally overwritten by the control server on receipt
+	SourceConnection int64
 	// Result of this code. This property is only set when the code has finished its execution
 	// It remains nil if the code has been cancelled.
 	Result CodeResult

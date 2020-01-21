@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/wilriker/goduetapiclient/commands"
 	"github.com/wilriker/goduetapiclient/connection"
 	"github.com/wilriker/goduetapiclient/connection/initmessages"
 	"github.com/wilriker/goduetapiclient/types"
@@ -43,13 +44,13 @@ func command(code string) {
 	if code != "" {
 		r, err := cc.PerformSimpleCode(code, types.SPI)
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 		log.Println(r)
 	} else {
 		mm, err := cc.GetSerializedMachineModel()
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 		log.Println(string(mm))
 	}
@@ -57,34 +58,39 @@ func command(code string) {
 
 func subscribe() {
 	sc := connection.SubscribeConnection{}
-	err := sc.Connect(initmessages.SubscriptionModeFull, "", LocalSock)
+	sc.Debug = true
+	err := sc.Connect(initmessages.SubscriptionModePatch, "heat/**", LocalSock)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	defer sc.Close()
-	m, err := sc.GetMachineModel()
+	m, err := sc.GetMachineModelPatch()
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	log.Println(m)
 }
 
 func intercept() {
-	bc := connection.InterceptConnection{}
-	err := bc.Connect(initmessages.InterceptionModePre, LocalSock)
+	ic := connection.InterceptConnection{}
+	ic.Debug = true
+	err := ic.Connect(initmessages.InterceptionModePre, LocalSock)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
-	defer bc.Close()
+	defer ic.Close()
 	for {
-		c, err := bc.ReceiveCode()
+		c, err := ic.ReceiveCode()
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
-		log.Println(c)
-		err = bc.IgnoreCode()
+		cc := c.Clone()
+		cc.Flags |= commands.Asynchronous
+		ic.PerformCode(cc)
+		// log.Println(c)
+		err = ic.IgnoreCode()
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 	}
 }

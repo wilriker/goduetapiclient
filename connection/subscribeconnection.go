@@ -42,7 +42,7 @@ func (sc *SubscribeConnection) GetMachineModel() (*machine.MachineModel, error) 
 // If the subscription mode is set to Patch, new update patches of the object model
 // need to be applied manually. This method is intended to receive such fragments.
 func (sc *SubscribeConnection) GetMachineModelPatch() (string, error) {
-	j, err := sc.ReceiveJson()
+	j, err := sc.ReceiveJSONString()
 	if err != nil {
 		return "", err
 	}
