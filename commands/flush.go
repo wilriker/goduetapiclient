@@ -2,13 +2,15 @@ package commands
 
 import "github.com/wilriker/goduetapiclient/types"
 
-// Flush waits for all pending codes of the given channel to finish.
+// Flush waits for all pending (macro) codes on the given channel to finish.
 // This effectively guarantees that all buffered codes are processed by RRF
 // before this command finishes.
 // If the flush request is successful, true is returned
 type Flush struct {
 	BaseCommand
 	// Channel is the CodeChannel to flush
+	// This value is ignored if this request is processed while a code is
+	// being intercepted.
 	Channel types.CodeChannel
 }
 

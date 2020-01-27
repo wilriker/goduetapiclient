@@ -67,6 +67,9 @@ const (
 	EnforceAbsolutePosition
 	// IsPrioritized will be sent to the firmware as soon as possible jumping all queued codes
 	IsPrioritized
+	// Unbuffered will execute this code circumventing any buffers
+	// Do NOT process another code on the same channel before this code has been fully executed
+	Unbuffered
 	// Placeholder to indicate that no flags are set
 	CodeFlagsNone = 0
 )
