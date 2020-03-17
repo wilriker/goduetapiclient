@@ -1,3 +1,7 @@
+# DEPRECATED - this has been moved to https://github.com/Duet3D/DSF-APIs
+
+
+
 # goduetapiclient
 Implementation of DuetAPIClient in Go
 
